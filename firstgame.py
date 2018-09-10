@@ -23,7 +23,7 @@ class Ball:
 			if pos[3] >= paddle_pos[1] and pos[3] <= paddle_pos[3]:
 				return True
 		return False
-		
+
 	def draw(self):
 		self.canvas.move(self.id, self.x, self.y)
 		pos = self.canvas.coords(self.id)
