@@ -1,0 +1,31 @@
+
+C_Game #Главный класс игры, управляет другим кодом
+    d_init #Функция инициализации игры
+    d_mainloop #Главный цыкл игровой анимации
+
+C_Coords #
+    d_init #
+
+C_Sprite #
+    d_init #
+    d_move #
+    d_coords #
+
+C_PlatformSprite #
+    d_init #
+
+C_StickFigureSprite #
+    d_init #
+    d_turnleft #
+    d_turnright #
+    d_jump #
+    d_animate #
+    d_coords #
+    d_move #
+
+d_within_x #
+d_within_y #
+d_collided_left #
+d_collided_right #
+d_collided_top #
+d_collided_bottom #

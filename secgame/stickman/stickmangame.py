@@ -4,15 +4,15 @@ import time
 
 class Game:
 	def __init__(self):
-		self.tk = Tk()
-		self.tk.title("Человечек спешит к выходу")
-		self.tk.resizable(0, 0)
-		self.tk.wm_attributes("-topmost", 1)
-		self.canvas = Canvas(self.tk, width=500, height=500, highlightthickness=0)
-		self.canvas.pack()
-		self.tk.update()
-		self.canvas_height = 500
-		self.canvas_width = 500
+		self.tk = Tk() #создали переменную и сохранили в ней обьект импортированного класса Tk модуля tkinter. Обьект создает пустое окно, в которое можно добавлять элементы.
+		self.tk.title("Человечек спешит к выходу") #заголовок игрового окна
+		self.tk.resizable(0, 0) #фиксируем размер окна (блокируем изменения)
+		self.tk.wm_attributes("-topmost", 1) #функция модуля Tkinter. Параметр топмост отвечает за размещение окна поверх всех окон
+		self.canvas = Canvas(self.tk, width=500, height=500, highlightthickness=0) #Создали холст, привязали его к обьекту tk с пустым окном, указали его размеры, а аргумент highlightthickness=0 удаляет рамку окна.
+		self.canvas.pack() #команда pack() включает отображение добавленных элементов на холст
+		self.tk.update() #Команда tk.update() подготавливает tkinter к игровой анимации. Без вызова update программа не будет работать так, как задумано.
+		self.canvas_height = 500 #Мы создали переменную, которая будет одним из наследуемых свойств класса. В переменной хранится ссылка(референс) на обьект 500, который соответствует одному из параметров размера холста.
+		self.canvas_width = 500 #--//--
 		self.bg = PhotoImage(file="background.gif")
 		w = self.bg.width()
 		h = self.bg.height()
@@ -47,12 +47,104 @@ class Sprite:
 	def coords(self):
 		return self.coordinates
 
-class PatformSprite(Sprite):
+class PlatformSprite(Sprite):
 	def __init__(self, game, photo_image, x, y, width, height):
 		Sprite.__init__(self, game)
 		self.photo_image = photo_image
 		self.image = game.canvas.create_image(x, y, image=self.photo_image, anchor='nw')
 		self.coordinates = Coords(x, y, x + width, y + height)
+
+class StickFigureSprite(Sprite):
+	def __init__(self, game):
+		Sprite.__init__(self, game)
+		self.images_left = [
+			PhotoImage(file="figure-L1.gif"),
+			PhotoImage(file="figure-L2.gif"),
+			PhotoImage(file="figure-L3.gif")
+		]
+		self.images_right = [
+			PhotoImage(file="figure-R1.gif"),
+			PhotoImage(file="figure-R2.gif"),
+			PhotoImage(file="figure-R3.gif")
+		]
+		self.image = game.canvas.create_image(200, 470, image=self.images_left[0], anchor='nw')
+		self.x = -2
+		self.y = 0
+		self.current_image = 0
+		self.current_image_add = 1
+		self.jump_count = 0
+		self.last_time = time.time()
+		self.coordinates = Coords()
+		game.canvas.bind_all('<KeyPress-Left>', self.turn_left)
+		game.canvas.bind_all('<KeyPress-Right>', self.turn_right)
+		game.canvas.bind_all('<Space>', self.jump)
+	
+	def turn_left(self, evt):
+		if self.y == 0:
+			self.x = -2
+	
+	def turn_right(self, evt):
+		if self.y == 0:
+			self.x = 2
+
+	def jump(self, evt):
+		if self.y == 0:
+			self.y = -4
+			self.jump_count = 0
+
+	def animate(self):
+		if self.x != 0 and self.y == 0:
+			if time.time() - self.last_time > 0.1:
+				self.last_time = time.time()
+				self.current_image += self.current_image_add
+				if self.current_image >= 2:
+					self.current_image_add = -1
+				if self.current_image <= 0:
+					self.current_image_add = 1
+		if self.x < 0:
+			if self.y != 0:
+				self.game.canvas.itemconfig(self.image, image=self.images_left[2])
+			else:
+				self.game.canvas.itemconfig(self.image, image=self.images_left[self.current_image])
+		elif self.x > 0:
+			if self.y != 0:
+				self.game.canvas.itemconfig(self.image, image=self.images_right[2])
+			else:
+				self.game.canvas.itemconfig(self.image, image=self.images_right[self.current_image])
+
+	def coords(self):
+		xy = self.game.canvas.coords(self.image)
+		self.coordinates.x1 = xy[0]
+		self.coordinates.y1 = xy[1]
+		self.coordinates.x2 = xy[0] + 27
+		self.coordinates.y2 = xy[1] + 30
+		return self.coordinates
+
+	def move(self):
+		self.animate()
+		if self.y < 0:
+			self.jump_count += 1
+			if self.jump_count > 20:
+				self.y = 4
+		if self.y > 0:
+			self.jump_count -= 1
+		co = self.coords()
+		left = True
+		right = True
+		bottom = True
+		falling = True
+		if self.y > 0 and co.y2 >= self.game.canvas_height:
+			self.y = 0
+			bottom = False
+		elif self.y < 0 and co.y1 <= 0:
+			self.y = 0
+			top = False
+		if self.x > 0 and co.x2 >= self.game.canvas_width:
+			self.x = 0
+			right = False
+		elif self.x < 0 and co.x1 <= 0:
+			self.x = 0
+			left = False
 
 def within_x(co1, co2):
 	if (co1.x1 > co2.x1 and co1.x1 < co2.x2) \
@@ -90,7 +182,7 @@ def collided_top(co1, co2):
 			return True
 	return False
 
-def collided_bottom(co1, co2):
+def collided_bottom(co1, co2,):
 	if within_x(co1, co2):
 		y_calc = co1.y2 + y
 		if y_calc >= co2.y1 and y_calc <= co2.y2:
