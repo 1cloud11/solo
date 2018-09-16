@@ -4,39 +4,39 @@ import time
 
 class Game:
 	def __init__(self):
-		self.tk = Tk()
-		self.tk.title("Человечек спешит к выходу")
-		self.tk.resizable(0, 0)
-		self.tk.wm_attributes("-topmost", 1)
-		self.canvas = Canvas(self.tk, width=500, height=500, highlightthickness=0)
-		self.canvas.pack()
-		self.tk.update()
-		self.canvas_height = 500
-		self.canvas_width = 500
-		self.bg = PhotoImage(file="background.gif")
-		w = self.bg.width()
-		h = self.bg.height()
-
-		for x in range(0, 5):
-			for y in range(0, 5):
-				self.canvas.create_image(x * w, y * h, image=self.bg, anchor='nw')
-		self.sprites = []
+		self.tk = Tk() # создали переменную и сохранили в ней обьект импортированного класса Tk модуля tkinter. Обьект создает пустое окно, в которое можно добавлять элементы.
+		self.tk.title("Человечек спешит к выходу") # заголовок игрового окна
+		self.tk.resizable(0, 0) # фиксируем размер окна (блокируем изменения)
+		self.tk.wm_attributes("-topmost", 1) # функция модуля Tkinter. Параметр топмост отвечает за размещение окна поверх всех окон
+		self.canvas = Canvas(self.tk, width=500, height=500, highlightthickness=0) # Создали холст, привязали его к обьекту tk с пустым окном, указали его размеры, а аргумент highlightthickness=0 удаляет рамку окна.
+		self.canvas.pack() # команда pack() включает отображение добавленных элементов на холст
+		self.tk.update() # Команда tk.update() подготавливает tkinter к игровой анимации. Без вызова update программа не будет работать так, как задумано.
+		self.canvas_height = 500 # Мы создали переменную, которая будет одним из наследуемых свойств класса. В переменной хранится ссылка(референс) на обьект 500, который соответствует одному из параметров размера холста.
+		self.canvas_width = 500 # --//--
+		self.bg = PhotoImage(file="background.gif") # bg - ещё одно свойство класса Game. Свойство - это обьект из встроенного в tkinter класса PhotoImage, который отвечает за чтение картинок формата .gif и их размещение на холст (canvas). в аргументы передаем наш бекграунд.
+		w = self.bg.width() # width и height - это функции класса PhotoImage, которые возвращают размер изображения (background в данном случае)
+		h = self.bg.height() # --//--
+# Размер холста 500х500. Размер background.gif 100x100. Следующий цикл заполняет холст изображением background.gif сначала по горизонтали, а затем - по вертикали.
+		for x in range(0, 5): # создаем переменную x и перебираем ее 5 раз (0, 1, 2, 3, 4)
+			for y in range(0, 5): # создаем переменную y и перебираем ее 5 раз (0, 1, 2, 3, 4) для каждого из x
+				self.canvas.create_image(x * w, y * h, image=self.bg, anchor='nw') # функция create_image выводит наше изображение в определенной позиции на холсте, отмеряя отступ в каждй итерации цикла ( в цикле х=1 х*w = 100, изображение будет размещено с отступом 100px по оси х)
+		self.sprites = [] # Спрайт - это графический обьект в игре, в нашей - человечек и платформы. Тут мы создали список наших спрайтов в игре.
 		self.running =  True
 
 	def mainloop(self):
-		while 1:
-			if self.running == True:
-				for sprite in self.sprites:
-					sprite.move()
-				self.tk.update_idletasks()
-				self.tk.update()
-				time.sleep(0.01)
+		while 1: # цикл while будет работать до закрытия игрового окна.
+			if self.running == True: # Проверяем значение running (строка 24)
+				for sprite in self.sprites: # В цикле мы перебираем все спрайты из списка sprites[] (строка 23)
+					sprite.move() # Для каждого спрайта списка sprites[] мы вызываем функцию move.
+				self.tk.update_idletasks() #М ы перерисовываем отображение обьектов на холсте
+				self.tk.update() #М ы перерисовываем отображение обьектов на холсте
+				time.sleep(0.01) # Делаем паузу на 1 сотую секунды между итерациями в цикле while 1
 class Coords:
 	def __init__(self, x1=0, y1=0, x2=0, y2=0):
-		self.x1 = x1
-		self.y1 = y1
-		self.x2 = x2
-		self.y2 = y2
+		self.x1 = x1 # Свойства класса Coords, в которых будут хранится координаты спрайтов.
+		self.y1 = y1 #--//--
+		self.x2 = x2 #--//--
+		self.y2 = y2 #--//--
 
 class Sprite:
 	def __init__(self, game):
@@ -190,7 +190,7 @@ def collided_bottom(co1, co2,):
 			return True
 	return False
 
-g = Game()
+g = Game() #мы создали обьект класса Game, и сохранили его в переменной g.
 
 platform1 = PlatformSprite(g, PhotoImage(file="platform1.gif"), 0, 480, 100, 10)
 platform2 = PlatformSprite(g, PhotoImage(file="platform1.gif"), 150, 440, 100, 10)
@@ -212,4 +212,4 @@ g.sprites.append(platform7)
 g.sprites.append(platform8)
 g.sprites.append(platform9)
 g.sprites.append(platform10)
-g.mainloop()
+g.mainloop() #Вызываем функцию mainloop для для созданного обьекта g (строка 193), запуская этим гланый цикл игры.
